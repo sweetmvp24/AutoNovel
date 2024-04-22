@@ -40,7 +40,7 @@ def generate_title(plot):
     response = generate_text(prompt_title, model, max_tokens, temperature, api_key, api_url)
     return response if response else None
 
-def generate_chapters(plot_outline, num_chapters, writing_style):
+def generate_chapters(plot_outline, num_chapters, writing_style, instruction):
     chapters = []
     for i in range(num_chapters):
         if chapters:
@@ -49,7 +49,7 @@ def generate_chapters(plot_outline, num_chapters, writing_style):
             prev_content = ""
         prompt_chapter = f'''Create chapter {i+1} of the book, in the writing style of {writing_style}, \
         based on the following plot outline:\n{plot_outline}\n and previous chapter content:\n{prev_content}\n \
-        The chapter should describe a complete event or conflict in a gripping way.'''
+        The creation of the chapter should follow the following instructions:\n{instruction}'''
         chapter = generate_text(prompt_chapter, model, max_tokens, temperature, api_key, api_url)
         if chapter:
             chapters.append(chapter)
@@ -69,7 +69,7 @@ api_key = st.selectbox('API Key:', ['sk-vT990qm3zTd8IgtcF670Ec285aB64fC9Bb4362F6
 api_url = st.selectbox('API URL:', ['https://api.gptapi.us/v1/chat/completions'])
 writing_style = st.text_input("写作风格", value="网文玄幻小说")
 book_description = st.text_area("小说故事背景：", value="在一个名为天武大陆的异世界,主角秦尘是一位拥有极高炼药和血脉修炼天赋的武域上神，却因被心爱的女人和挚友背叛而陨落。数百年后，秦尘的意识在大玄国的一名同名少年体内意外觉醒，从此开始了一段新的征程。")
-instruction = st.text_area('内容生成调教指令:', value="1.各个章节内容之间过渡要自然、合理,不要有突兀的感觉, 2.每个章节内容描述一个完整的事件或者冲突,并且能推动故事发展。")
+instruction = st.text_area('内容生成调教指令:', value="1.每个章节内容描述一个完整的事件或者冲突,并且能推动故事发展。2.相邻章节内容之间过渡要自然、合理,不要有突兀的感觉。 3.每个章节字数大概在#1500字#左右,不要太短或太长。")
 num_chapters = st.number_input("章节数：", min_value=1, value=10)
 model = st.selectbox('大模型:', ['claude-3-haiku', 'claude-3-haiku-20240229','claude-3-haiku-20240307', 'claude-3-sonnet','gpt-4-turbo-preview','claude-3-opus-20240229', 'gpt-3.5-turbo-0613'])
 max_tokens = st.slider('最大输出字数:', min_value=100, max_value=4000, value=3000)
@@ -87,4 +87,4 @@ if st.button('开始自动生成'):
         st.text_area('小说故事大纲如下:', value=plot_outline, height=300, disabled=False)
         st.download_button("下载小说大纲", plot_outline, file_name=f"{title}小说大纲.txt")
 
-        chapters = generate_chapters(plot_outline, num_chapters, writing_style)
+        chapters = generate_chapters(plot_outline, num_chapters, writing_style, instruction)
